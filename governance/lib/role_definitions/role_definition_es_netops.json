@@ -1,0 +1,27 @@
+{
+    "name": "46104274-badd-4de5-a98a-6a0060940635",
+    "type": "Microsoft.Authorization/roleDefinitions",
+    "apiVersion": "2018-01-01-preview",
+    "properties": {
+        "roleName": "NetOps",
+        "description": "Enterprise-scale custom Role Definition. Grants access for platform network operations.",
+        "type": "customRole",
+        "permissions": [
+            {
+                "actions": [
+                    "*/read",
+                    "Microsoft.Network/vpnGateways/*",
+                    "Microsoft.Network/expressRouteCircuits/*",
+                    "Microsoft.Network/routeTables/write",
+                    "Microsoft.Network/vpnSites/*"
+                ],
+                "notActions": [],
+                "dataActions": [],
+                "notDataActions": []
+            }
+        ],
+        "assignableScopes": [
+            "${current_scope_resource_id}"
+        ]
+    }
+}

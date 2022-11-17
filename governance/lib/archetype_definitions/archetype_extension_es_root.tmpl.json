@@ -1,0 +1,27 @@
+{
+    "extend_es_root": {
+        "policy_assignments": [],
+        "policy_definitions": [
+            "ES-Deploy-Budget"
+        ],
+        "policy_set_definitions": [],
+        "role_definitions": [],
+        "archetype_config": {
+            "parameters": {
+                "ES-Deploy-Budget": {
+                    "amount": "1000",
+                    "timeGrain": "Monthly",
+                    "firstThreshold": "75",
+                    "secondThreshold": "100",
+                    "contactEmails": [
+                        "sebastian@schillman.se"
+                    ],
+                    "contactRoles": [
+                        "Reader"
+                    ]
+                }
+            },
+            "access_control": {}
+        }
+    }
+}

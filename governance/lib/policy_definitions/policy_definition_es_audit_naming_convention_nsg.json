@@ -1,0 +1,150 @@
+{
+  "name": "Audit-Naming-NSG",
+  "type": "Microsoft.Authorization/policyDefinitions",
+  "apiVersion": "2019-09-01",
+  "properties": {
+    "description": "Audit the name set for all Network security groups.",
+    "displayName": "Audit-Naming-NSG",
+    "mode": "All",
+    "parameters": {},
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Network/networkSecurityGroups"
+          },
+          {
+            "not": {
+              "field": "name",
+              "match": "[concat('nsg-', '...', '-', 'prod', '-', '##')]"
+            }
+          },
+          {
+            "not": {
+              "field": "name",
+              "match": "[concat('nsg-', '....', '-', 'prod', '-', '##')]"
+            }
+          },
+          {
+            "not": {
+              "field": "name",
+              "match": "[concat('nsg-', '.....', '-', 'prod', '-', '##')]"
+            }
+          },
+          {
+            "not": {
+              "field": "name",
+              "match": "[concat('nsg-', '......', '-', 'prod', '-', '##')]"
+            }
+          },
+          {
+            "not": {
+              "field": "name",
+              "match": "[concat('nsg-', '.......', '-', 'prod', '-', '##')]"
+            }
+          },
+          {
+            "not": {
+              "field": "name",
+              "match": "[concat('nsg-', '........', '-', 'prod', '-', '##')]"
+            }
+          },
+          {
+            "not": {
+              "field": "name",
+              "match": "[concat('nsg-', '...', '-', 'dev', '-', '##')]"
+            }
+          },
+          {
+            "not": {
+              "field": "name",
+              "match": "[concat('nsg-', '....', '-', 'dev', '-', '##')]"
+            }
+          },
+          {
+            "not": {
+              "field": "name",
+              "match": "[concat('nsg-', '.....', '-', 'dev', '-', '##')]"
+            }
+          },
+          {
+            "not": {
+              "field": "name",
+              "match": "[concat('nsg-', '......', '-', 'dev', '-', '##')]"
+            }
+          },
+          {
+            "not": {
+              "field": "name",
+              "match": "[concat('nsg-', '.......', '-', 'dev', '-', '##')]"
+            }
+          },
+          {
+            "not": {
+              "field": "name",
+              "match": "[concat('nsg-', '........', '-', 'dev', '-', '##')]"
+            }
+          },
+          {
+            "not": {
+              "field": "name",
+              "match": "[concat('nsg-', '...')]"
+            }
+          },
+          {
+            "not": {
+              "field": "name",
+              "match": "[concat('nsg-', '....')]"
+            }
+          },
+          {
+            "not": {
+              "field": "name",
+              "match": "[concat('nsg-', '.....')]"
+            }
+          },
+          {
+            "not": {
+              "field": "name",
+              "match": "[concat('nsg-', '......')]"
+            }
+          },
+          {
+            "not": {
+              "field": "name",
+              "match": "[concat('nsg-', '.......')]"
+            }
+          },
+          {
+            "not": {
+              "field": "name",
+              "match": "[concat('nsg-', '........')]"
+            }
+          },
+          {
+            "not": {
+              "field": "name",
+              "match": "[concat('nsg-', '.........')]"
+            }
+          },
+          {
+            "not": {
+              "field": "name",
+              "match": "[concat('nsg-', '..........')]"
+            }
+          },
+          {
+            "not": {
+              "field": "name",
+              "match": "[concat('nsg-', '...........')]"
+            }
+          }
+        ]
+      },
+      "then": {
+        "effect": "audit"
+      }
+    }
+  }
+}

@@ -1,0 +1,96 @@
+{
+  "name": "Audit-Naming-KV",
+  "type": "Microsoft.Authorization/policyDefinitions",
+  "apiVersion": "2019-09-01",
+  "properties": {
+    "description": "Audit the naming set for all Key Vaults.",
+    "displayName": "Audit-Naming-KV",
+    "mode": "All",
+    "parameters": {},
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.KeyVault/vaults"
+          },
+          {
+            "not": {
+              "field": "name",
+              "match": "[concat('kv-', '...', '-', 'prod', '-', '##')]"
+            }
+          },
+          {
+            "not": {
+              "field": "name",
+              "match": "[concat('kv-', '....', '-', 'prod', '-', '##')]"
+            }
+          },
+          {
+            "not": {
+              "field": "name",
+              "match": "[concat('kv-', '.....', '-', 'prod', '-', '##')]"
+            }
+          },
+          {
+            "not": {
+              "field": "name",
+              "match": "[concat('kv-', '......', '-', 'prod', '-', '##')]"
+            }
+          },
+          {
+            "not": {
+              "field": "name",
+              "match": "[concat('kv-', '.......', '-', 'prod', '-', '##')]"
+            }
+          },
+          {
+            "not": {
+              "field": "name",
+              "match": "[concat('kv-', '........', '-', 'prod', '-', '##')]"
+            }
+          },
+          {
+            "not": {
+              "field": "name",
+              "match": "[concat('kv-', '...', '-', 'dev', '-', '##')]"
+            }
+          },
+          {
+            "not": {
+              "field": "name",
+              "match": "[concat('kv-', '....', '-', 'dev', '-', '##')]"
+            }
+          },
+          {
+            "not": {
+              "field": "name",
+              "match": "[concat('kv-', '.....', '-', 'dev', '-', '##')]"
+            }
+          },
+          {
+            "not": {
+              "field": "name",
+              "match": "[concat('kv-', '......', '-', 'dev', '-', '##')]"
+            }
+          },
+          {
+            "not": {
+              "field": "name",
+              "match": "[concat('kv-', '.......', '-', 'dev', '-', '##')]"
+            }
+          },
+          {
+            "not": {
+              "field": "name",
+              "match": "[concat('kv-', '........', '-', 'dev', '-', '##')]"
+            }
+          }
+        ]
+      },
+      "then": {
+        "effect": "deny"
+      }
+    }
+  }
+}

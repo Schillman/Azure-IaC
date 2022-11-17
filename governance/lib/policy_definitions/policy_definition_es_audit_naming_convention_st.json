@@ -1,0 +1,96 @@
+{
+  "name": "Audit-Naming-SA",
+  "type": "Microsoft.Authorization/policyDefinitions",
+  "apiVersion": "2019-09-01",
+  "properties": {
+    "description": "Audit the name set for all Storage Accounts.",
+    "displayName": "Audit-Naming-SA",
+    "mode": "All",
+    "parameters": {},
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Storage/storageAccounts"
+          },
+          {
+            "not": {
+              "field": "name",
+              "match": "[concat('st', '...', 'prod', '##')]"
+            }
+          },
+          {
+            "not": {
+              "field": "name",
+              "match": "[concat('st', '....', 'prod', '##')]"
+            }
+          },
+          {
+            "not": {
+              "field": "name",
+              "match": "[concat('st', '.....', 'prod', '##')]"
+            }
+          },
+          {
+            "not": {
+              "field": "name",
+              "match": "[concat('st', '......', 'prod', '##')]"
+            }
+          },
+          {
+            "not": {
+              "field": "name",
+              "match": "[concat('st', '.......', 'prod', '##')]"
+            }
+          },
+          {
+            "not": {
+              "field": "name",
+              "match": "[concat('st', '........', 'prod', '##')]"
+            }
+          },
+          {
+            "not": {
+              "field": "name",
+              "match": "[concat('st', '...', 'dev', '##')]"
+            }
+          },
+          {
+            "not": {
+              "field": "name",
+              "match": "[concat('st', '....', 'dev', '##')]"
+            }
+          },
+          {
+            "not": {
+              "field": "name",
+              "match": "[concat('st', '.....', 'dev', '##')]"
+            }
+          },
+          {
+            "not": {
+              "field": "name",
+              "match": "[concat('st', '......', 'dev', '##')]"
+            }
+          },
+          {
+            "not": {
+              "field": "name",
+              "match": "[concat('st', '.......', 'dev', '##')]"
+            }
+          },
+          {
+            "not": {
+              "field": "name",
+              "match": "[concat('st', '........', 'dev', '##')]"
+            }
+          }
+        ]
+      },
+      "then": {
+        "effect": "deny"
+      }
+    }
+  }
+}

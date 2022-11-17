@@ -1,0 +1,60 @@
+{
+  "name": "Audit-Naming-VM",
+  "type": "Microsoft.Authorization/policyDefinitions",
+  "apiVersion": "2019-09-01",
+  "properties": {
+    "description": "Audit the name set for all Virtual Machines.",
+    "displayName": "Audit-Naming-VM",
+    "mode": "All",
+    "parameters": {},
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Compute/VirtualMachines"
+          },
+          {
+            "not": {
+              "field": "name",
+              "match": "[concat('azvm-', '..', '###')]"
+            }
+          },
+          {
+            "not": {
+              "field": "name",
+              "match": "[concat('azvm-', '...', '###')]"
+            }
+          },
+          {
+            "not": {
+              "field": "name",
+              "match": "[concat('azvm-', '....', '###')]"
+            }
+          },
+          {
+            "not": {
+              "field": "name",
+              "match": "[concat('azvm-', '.....', '###')]"
+            }
+          },
+          {
+            "not": {
+              "field": "name",
+              "match": "[concat('azvm-', '......', '###')]"
+            }
+          },
+          {
+            "not": {
+              "field": "name",
+              "match": "[concat('azvm-', '.......', '###')]"
+            }
+          }
+        ]
+      },
+      "then": {
+        "effect": "deny"
+      }
+    }
+  }
+}

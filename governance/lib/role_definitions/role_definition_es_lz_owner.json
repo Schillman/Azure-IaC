@@ -1,0 +1,29 @@
+{
+    "name": "19d2abc3-f601-494b-b9c7-b71390bdb8de",
+    "type": "Microsoft.Authorization/roleDefinitions",
+    "apiVersion": "2018-01-01-preview",
+    "properties": {
+        "roleName": "LZ-Owner",
+        "description": "Enterprise-scale custom Role Definition. Grants full access to manage LandingZone subscriptions.",
+        "type": "customRole",
+        "permissions": [
+            {
+                "actions": [
+                    "*"
+                ],
+                "notActions": [
+                    "Microsoft.Authorization/*/write",
+                    "Microsoft.Network/vpnGateways/*",
+                    "Microsoft.Network/expressRouteCircuits/*",
+                    "Microsoft.Network/routeTables/write",
+                    "Microsoft.Network/vpnSites/*"
+                ],
+                "dataActions": [],
+                "notDataActions": []
+            }
+        ],
+        "assignableScopes": [
+            "${current_scope_resource_id}"
+        ]
+    }
+}

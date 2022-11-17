@@ -1,0 +1,52 @@
+{
+  "name": "Modify-Tag-RG",
+  "type": "Microsoft.Authorization/policyDefinitions",
+  "apiVersion": "2019-09-01",
+  "properties": {
+    "description": "Adds the specified tag with its value from the containing subscription when a resource group is missing a tag it is created or updated. If the tag exists with a different value it will not be changed.",
+    "displayName": "Modify-Tag-RG",
+    "mode": "All",
+    "parameters": {
+      "tagName": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Tag Name",
+          "description": "Name of the tag, such as 'environment'"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Resources/subscriptions/resourceGroups"
+          },
+          {
+            "field": "[concat('tags[', parameters('tagName'), ']')]",
+            "exists": "false"
+          },
+          {
+            "value": "[subscription().tags[parameters('tagName')]]",
+            "notEquals": ""
+          }
+        ]
+      },
+      "then": {
+        "effect": "modify",
+        "details": {
+          "roleDefinitionIds": [
+            "/providers/microsoft.authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c"
+          ],
+          "operations": [
+            {
+              "operation": "add",
+              "field": "[concat('tags[', parameters('tagName'), ']')]",
+              "value": "[subscription().tags[parameters('tagName')]]"
+            }
+          ]
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,31 @@
+{
+    "name": "2295e382-45df-4a05-837b-f80509fb8741",
+    "type": "Microsoft.Authorization/roleDefinitions",
+    "apiVersion": "2018-01-01-preview",
+    "properties": {
+        "roleName": "SecOps",
+        "description": "Enterprise-scale custom Role Definition. Grants access for platform security operations.",
+        "type": "customRole",
+        "permissions": [
+            {
+                "actions": [
+                    "*/read",
+                    "*/register/action",
+                    "Microsoft.KeyVault/locations/deletedVaults/purge/action",
+                    "Microsoft.Insights/alertRules/*",
+                    "Microsoft.Authorization/policyDefinitions/*",
+                    "Microsoft.Authorization/policyAssignments/*",
+                    "Microsoft.Authorization/policySetDefinitions/*",
+                    "Microsoft.PolicyInsights/*",
+                    "Microsoft.Security/*"
+                ],
+                "notActions": [],
+                "dataActions": [],
+                "notDataActions": []
+            }
+        ],
+        "assignableScopes": [
+            "${current_scope_resource_id}"
+        ]
+    }
+}

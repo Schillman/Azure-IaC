@@ -1,0 +1,32 @@
+trigger:
+  branches:
+    include:
+    - main
+  paths:
+    include:
+    - governance
+
+variables:
+  TERRAFORM_VERSION: "1.1.7"
+
+  
+pool:
+  vmImage: 'ubuntu-latest'
+
+stages: 
+- stage: Setup
+  jobs:
+    - job: Setup
+      steps:
+      - task: TerraformInstaller@0
+        inputs:
+          terraformVersion: '0.13.2'
+
+      - script: |
+              ls $(System.DefaultWorkingDirectory)
+              echo "terraform build started.."
+              cd $(System.DefaultWorkingDirectory)/src/code
+              echo "list all the files"
+              ls 
+        displayName: 'Setup Enviroment'
+      

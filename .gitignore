@@ -5,14 +5,21 @@
 *.tfstate
 *.tfstate.*
 
+# Lock files
+.terraform.lock.hcl
+
 # Crash log files
 crash.log
+
+# ignore devcontainer directory.
+**/.devcontainer
 
 # Ignore any .tfvars files that are generated automatically for each Terraform run. Most
 # .tfvars files are managed as part of configuration and so should be included in
 # version control.
 #
-# example.tfvars
+backend.tfvars
+*secret*.tfvars
 
 # Ignore override files as they are usually used to override resources locally and so
 # are not checked in
@@ -27,3 +34,17 @@ override.tf.json
 
 # Include tfplan files to ignore the plan output of command: terraform plan -out=tfplan
 # example: *tfplan*
+
+# Ignore any files with .ignore. in the filename
+*.ignore.*
+
+# Ignore macOS .DS_Store files which are generated automatically by Finder.
+.DS_Store
+
+# Ignore Visual Studio Code config
+**/.vscode/*
+
+# Ignore Super-Linter log
+**/super-linter.report
+**/super-linter.report/*
+**/super-linter.log

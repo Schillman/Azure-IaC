@@ -1,0 +1,162 @@
+{
+  "name": "Audit-Naming-RG",
+  "type": "Microsoft.Authorization/policyDefinitions",
+  "apiVersion": "2019-09-01",
+  "properties": {
+    "description": "Audit the naming set for all recourse groups.",
+    "displayName": "Audit-Naming-RG",
+    "mode": "All",
+    "parameters": {},
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Resources/subscriptions/resourceGroups"
+          },
+          {
+            "not": {
+              "field": "name",
+              "match": "[concat('rg-', '...', '-', 'prod', '-', resourceGroup().location)]"
+            }
+          },
+          {
+            "not": {
+              "field": "name",
+              "match": "[concat('rg-', '....', '-', 'prod', '-', resourceGroup().location)]"
+            }
+          },
+          {
+            "not": {
+              "field": "name",
+              "match": "[concat('rg-', '.....', '-', 'prod', '-', resourceGroup().location)]"
+            }
+          },
+          {
+            "not": {
+              "field": "name",
+              "match": "[concat('rg-', '......', '-', 'prod', '-', resourceGroup().location)]"
+            }
+          },
+          {
+            "not": {
+              "field": "name",
+              "match": "[concat('rg-', '.......', '-', 'prod', '-', resourceGroup().location)]"
+            }
+          },
+          {
+            "not": {
+              "field": "name",
+              "match": "[concat('rg-', '........', '-', 'prod', '-', resourceGroup().location)]"
+            }
+          },
+          {
+            "not": {
+              "field": "name",
+              "match": "[concat('rg-', '...', '-', 'dev', '-', resourceGroup().location)]"
+            }
+          },
+          {
+            "not": {
+              "field": "name",
+              "match": "[concat('rg-', '....', '-', 'dev', '-', resourceGroup().location)]"
+            }
+          },
+          {
+            "not": {
+              "field": "name",
+              "match": "[concat('rg-', '.....', '-', 'dev', '-', resourceGroup().location)]"
+            }
+          },
+          {
+            "not": {
+              "field": "name",
+              "match": "[concat('rg-', '......', '-', 'dev', '-', resourceGroup().location)]"
+            }
+          },
+          {
+            "not": {
+              "field": "name",
+              "match": "[concat('rg-', '.......', '-', 'dev', '-', resourceGroup().location)]"
+            }
+          },
+          {
+            "not": {
+              "field": "name",
+              "match": "[concat('rg-', '........', '-', 'dev', '-', resourceGroup().location)]"
+            }
+          },
+          {
+            "not": {
+              "field": "name",
+              "match": "[concat('rg-', '...', '-', resourceGroup().location)]"
+            }
+          },
+          {
+            "not": {
+              "field": "name",
+              "match": "[concat('rg-', '....', '-', resourceGroup().location)]"
+            }
+          },
+          {
+            "not": {
+              "field": "name",
+              "match": "[concat('rg-', '.....', '-', resourceGroup().location)]"
+            }
+          },
+          {
+            "not": {
+              "field": "name",
+              "match": "[concat('rg-', '......', '-', resourceGroup().location)]"
+            }
+          },
+          {
+            "not": {
+              "field": "name",
+              "match": "[concat('rg-', '.......', '-', resourceGroup().location)]"
+            }
+          },
+          {
+            "not": {
+              "field": "name",
+              "match": "[concat('rg-', '........', '-', resourceGroup().location)]"
+            }
+          },
+          {
+            "not": {
+              "field": "name",
+              "match": "[concat('rg-', '.........', '-', resourceGroup().location)]"
+            }
+          },
+          {
+            "not": {
+              "field": "name",
+              "match": "[concat('rg-', '..........', '-', resourceGroup().location)]"
+            }
+          },
+          {
+            "not": {
+              "field": "name",
+              "match": "[concat('rg-', '...........', '-', resourceGroup().location)]"
+            }
+          },
+          {
+            "not": {
+              "field": "name",
+              "match": "[concat('rg-', '............', '-', resourceGroup().location)]"
+            }
+          },
+          {
+            "not": {
+              "field": "name",
+              "match": "[concat('rg-', '.............', '-', resourceGroup().location)]"
+            }
+          }
+        ]
+      },
+      "then": {
+        "effect": "deny"
+      }
+    }
+  }
+}

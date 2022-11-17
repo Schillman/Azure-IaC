@@ -1,0 +1,32 @@
+{
+    "name": "4b84b879-d9e3-4f76-9309-ea3a58a90443",
+    "type": "Microsoft.Authorization/roleDefinitions",
+    "apiVersion": "2018-01-01-preview",
+    "properties": {
+        "roleName": "LZ-AppOps",
+        "description": "Enterprise-scale custom Role Definition. Grants access for application and operations team in LandingZones Resource Groups.",
+        "type": "customRole",
+        "permissions": [
+            {
+                "actions": [
+                    "*"
+                ],
+                "notActions": [
+                    "Microsoft.Authorization/*/write",
+                    "Microsoft.Network/vpnGateways/*",
+                    "Microsoft.Network/expressRouteCircuits/*",
+                    "Microsoft.Network/routeTables/write",
+                    "Microsoft.Network/vpnSites/*",
+                    "Microsoft.Network/publicIPAddresses/write",
+                    "Microsoft.Network/virtualNetworks/write",
+                    "Microsoft.KeyVault/locations/deletedVaults/purge/action"
+                ],
+                "dataActions": [],
+                "notDataActions": []
+            }
+        ],
+        "assignableScopes": [
+            "${current_scope_resource_id}"
+        ]
+    }
+}

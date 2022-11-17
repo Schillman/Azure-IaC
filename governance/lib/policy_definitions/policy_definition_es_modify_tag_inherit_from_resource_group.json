@@ -1,0 +1,48 @@
+{
+  "name": "Modify-Tag-Resources",
+  "type": "Microsoft.Authorization/policyDefinitions",
+  "apiVersion": "2019-09-01",
+  "properties": {
+    "description": "Adds the specified tag with its value from the resource group to the resource if the tag is missing. Existing resources can be remediated by triggering a remediation task.",
+    "displayName": "Modify-Tag-Resources",
+    "mode": "Indexed",
+    "parameters": {
+      "tagName": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Tag Name",
+          "description": "Name of the tag, such as 'environment'"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "[concat('tags[', parameters('tagName'), ']')]",
+            "exists": "false"
+          },
+          {
+            "value": "[resourceGroup().tags[parameters('tagName')]]",
+            "notEquals": ""
+          }
+        ]
+      },
+      "then": {
+        "effect": "modify",
+        "details": {
+          "roleDefinitionIds": [
+            "/providers/microsoft.authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c"
+          ],
+          "operations": [
+            {
+              "operation": "add",
+              "field": "[concat('tags[', parameters('tagName'), ']')]",
+              "value": "[resourceGroup().tags[parameters('tagName')]]"
+            }
+          ]
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "name": "Audit-Naming-Convention",
+  "type": "Microsoft.Authorization/policySetDefinitions",
+  "apiVersion": "2019-09-01",
+  "properties": {
+    "description": "Audit resource names to follow our naming standard",
+    "displayName": "Audit-Naming-Convention",
+    "parameters": {},
+    "policyDefinitionGroups": [],
+    "policyDefinitions": [
+      {
+        "policyDefinitionReferenceId": "Audit-Naming-RG",
+        "policyDefinitionId": "${current_scope_resource_id}/providers/Microsoft.Authorization/policyDefinitions/Audit-Naming-RG"
+      },
+      {
+        "policyDefinitionReferenceId": "Audit-Naming-KV",
+        "policyDefinitionId": "${current_scope_resource_id}/providers/Microsoft.Authorization/policyDefinitions/Audit-Naming-KV"
+      },
+      {
+        "policyDefinitionReferenceId": "Audit-Naming-VM",
+        "policyDefinitionId": "${current_scope_resource_id}/providers/Microsoft.Authorization/policyDefinitions/Audit-Naming-VM"
+      },
+      {
+        "policyDefinitionReferenceId": "Audit-Naming-SA",
+        "policyDefinitionId": "${current_scope_resource_id}/providers/Microsoft.Authorization/policyDefinitions/Audit-Naming-SA"
+      },
+      {
+        "policyDefinitionReferenceId": "Audit-Naming-NSG",
+        "policyDefinitionId": "${current_scope_resource_id}/providers/Microsoft.Authorization/policyDefinitions/Audit-Naming-NSG"
+      }
+    ]
+  }
+}
