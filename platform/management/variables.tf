@@ -58,6 +58,19 @@ variable "settings" {
   description = "resource settings for preparing the \"Management\" landing zone."
 }
 
+variable "key_vaults" {
+  type        = map(map(list(string)))
+  description = "(Required) a map with key vault name with its role assignment containing a list of principalIds."
+  default = {
+    "key_vault_name" = {
+      "role_assignment_name" = ["principalId1", "principalId2"]
+    }
+  }
+}
+
+variable "key_vaults_secrets" {
+  description = "(Required) a map with key vault name and it secret name and values."
+}
 # DNS Zones
 variable "dns_zone_name" {
   type        = string
@@ -70,8 +83,8 @@ variable "mx_record" {
 }
 
 variable "dns_cname_record" {
-  description = "Object to enable DNS CNAME Records within Azure DNS."
   type = map(object({
     record = string
   }))
+  description = "Map of object to enable DNS CNAME Records within Azure DNS."
 }

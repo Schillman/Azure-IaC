@@ -1,4 +1,4 @@
-name: platfrom/management deploy
+name: platform/management deploy
 
 on:
   workflow_dispatch:
@@ -11,10 +11,11 @@ on:
 
   push:
     paths:
-    - platfrom/management/**
+      - platform/management/**
 
 env:
-  tf_actions_working_dir: platfrom/management
+  tf_actions_working_dir: platform/management
+  key_vault: kv-schillman-management
 
 permissions:
   id-token: write
@@ -30,127 +31,138 @@ jobs:
         working-directory: ${{ env.tf_actions_working_dir }}
 
     steps:
-    - uses: actions/checkout@v2
+      - uses: actions/checkout@v2
 
-    - name: Log in to Azure using OIDC
-      uses: azure/login@v1
-      with:
-        client-id: ${{ secrets.AZURE_CLIENT_ID }}
-        tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-        subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      - name: Log in to Azure using OIDC
+        uses: azure/login@v1
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-    - name: Setup Terraform
-      uses: hashicorp/setup-terraform@v1
+      - uses: Azure/get-keyvault-secrets@v1
+        with:
+          keyvault: ${{ env.key_vault }} # name of key vault in Azure portal
+          secrets: "tenant-id, key, storage-account-name, container-name, resource-group-name, subscription-id, tf-secrets-json" # comma separated list of secret keys to fetch from key vault
+        id: keyvault # ID for secrets that you will reference
 
-    - name: Setup TFLint
-      uses: terraform-linters/setup-tflint@v1
+      - name: Create JSON file from the tf-secrets-json secret value.
+        run: |
+         echo ${{ steps.keyvault.outputs.tf-secrets-json }} > tf_secret.json
 
-    - name: Terraform fmt
-      id: fmt
-      run: terraform fmt -check
-      continue-on-error: true
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
 
-    - name: Terraform Init
-      id: init
-      run: terraform init -backend-config=${{ secrets.MANAGEMENT_BACKEND }}
-      env:
-        ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-        ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-        ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-        ARM_USE_OIDC: true
+      - name: Setup TFLint
+        uses: terraform-linters/setup-tflint@v1
 
-    - name: Terraform Validate
-      id: validate
-      run: terraform validate -no-color
+      - name: Terraform fmt
+        id: fmt
+        run: terraform fmt -check
+        continue-on-error: true
 
-    - name: Init TFLint
-      run: tflint --init
+      - name: Terraform Init
+        id: init
+        run:
+          terraform init -backend-config="tenant_id=${{ steps.keyvault.outputs.tenant-id }}"
+          -backend-config="subscription_id=${{ steps.keyvault.outputs.subscription-id }}"
+          -backend-config="resource_group_name=${{ steps.keyvault.outputs.resource-group-name }}"
+          -backend-config="storage_account_name=${{ steps.keyvault.outputs.storage-account-name }}"
+          -backend-config="container_name=${{ steps.keyvault.outputs.container-name }}"
+          -backend-config="key=${{ steps.keyvault.outputs.key }}"
 
-    - name: Run TFLint
-      run: tflint -f compact
+      - name: Terraform Validate
+        id: validate
+        run: terraform validate -no-color
 
-    - name: Calculate destroy arg
-      id: destroy_arg
-      run: |
-        if [ $DESTROY == "true" ]; then
-          echo "::set-output name=val::-destroy"
-        else
-          echo "::set-output name=val:: "
-        fi
-      env:
-        DESTROY: ${{ github.event.inputs.destroy }}
+      - name: Init TFLint
+        run: tflint --init
 
-    - name: Terraform Plan
-      id: plan
-      run: terraform plan -var-file=${{ secrets.JSON_OBJECT }} $DESTROY -no-color --out=out.tfplan
-      env:
-        ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-        ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-        ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-        ARM_USE_OIDC: true
-        DESTROY: ${{ steps.destroy_arg.outputs.val }}
+      - name: Run TFLint
+        run: tflint -f compact
 
-    - name: Create the plan summary
-      uses: actions/github-script@v6
-      if: always()
-      id: summary
-      env:
-        PLAN: '${{ steps.plan.outputs.stdout }}'
-      with:
-        github-token: ${{ secrets.GITHUB_TOKEN }}
-        script: |
-          // 1. Prep the output
-          const output = `#### Terraform Format and Style 🖌\`${{ steps.fmt.outcome }}\`
-          #### Terraform Initialization ⚙️\`${{ steps.init.outcome }}\`
-          #### Terraform Validation 🤖\`${{ steps.validate.outcome }}\`
-          <details><summary>Validation Output</summary>
+      - name: Calculate destroy arg
+        id: destroy_arg
+        run: |
+          if [ $DESTROY == "true" ]; then
+            echo "::set-output name=val::-destroy"
+          else
+            echo "::set-output name=val:: "
+          fi
+        env:
+          DESTROY: ${{ github.event.inputs.destroy }}
 
-          \`\`\`\n
-          ${{ steps.validate.outputs.stdout }}
-          \`\`\`
+      - name: Terraform Plan
+        id: plan
+        run: terraform plan -var-file=tf_secret.json $DESTROY -no-color --out=out.tfplan
+        env:
+          ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          ARM_USE_OIDC: true
+          DESTROY: ${{ steps.destroy_arg.outputs.val }}
 
-          </details>
+      - name: Create the plan summary
+        uses: actions/github-script@v6
+        if: always()
+        id: summary
+        env:
+          PLAN: "${{ steps.plan.outputs.stdout }}"
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            // 1. Prep the output
+            const output = `#### Terraform Format and Style 🖌\`${{ steps.fmt.outcome }}\`
+            #### Terraform Initialization ⚙️\`${{ steps.init.outcome }}\`
+            #### Terraform Validation 🤖\`${{ steps.validate.outcome }}\`
+            <details><summary>Validation Output</summary>
 
-          #### Terraform Plan 📖\`${{ steps.plan.outcome }}\`
+            \`\`\`\n
+            ${{ steps.validate.outputs.stdout }}
+            \`\`\`
 
-          <details><summary>Show Plan</summary>
+            </details>
 
-          \`\`\`\n
-          ${process.env.PLAN}
-          \`\`\`
+            #### Terraform Plan 📖\`${{ steps.plan.outcome }}\`
 
-          </details>
+            <details><summary>Show Plan</summary>
 
-          *Pusher: @${{ github.actor }}, Action: \`${{ github.event_name }}\`, Working Directory: \`${{ env.tf_actions_working_dir }}\`, Workflow: \`${{ github.workflow }}\`*`;
+            \`\`\`\n
+            ${process.env.PLAN}
+            \`\`\`
 
-          // 2. Set the output variable
-          const fs = require('fs');
-          fs.writeFileSync('${{ env.tf_actions_working_dir }}/summary.md', output);
-          core.setOutput('summary', output);
+            </details>
 
-    - name: Write the step summary
-      if: always()
-      run: cat summary.md >> $GITHUB_STEP_SUMMARY
+            *Pusher: @${{ github.actor }}, Action: \`${{ github.event_name }}\`, Working Directory: \`${{ env.tf_actions_working_dir }}\`, Workflow: \`${{ github.workflow }}\`*`;
 
-    - name: Upload the plan
-      uses: actions/upload-artifact@v3
-      with:
-        name: tf-plan
-        path: ${{ env.tf_actions_working_dir }}/out.tfplan
+            // 2. Set the output variable
+            const fs = require('fs');
+            fs.writeFileSync('${{ env.tf_actions_working_dir }}/summary.md', output);
+            core.setOutput('summary', output);
 
-    - name: Publish plan as a status
-      if: github.event_name == 'push'
-      uses: Sibz/github-status-action@v1.1.6
-      with:
-        authToken: ${{ secrets.GITHUB_TOKEN }}
-        state: ${{ steps.summary.outputs.summary }}
-        context: Terraform Plan
-        description: Terraform Plan Summary
-        sha: ${{ github.event.push.head.sha }}
+      - name: Write the step summary
+        if: always()
+        run: cat summary.md >> $GITHUB_STEP_SUMMARY
+
+      - name: Upload the plan
+        uses: actions/upload-artifact@v3
+        with:
+          name: tf-plan
+          path: ${{ env.tf_actions_working_dir }}/out.tfplan
+
+      - name: Publish plan as a status
+        if: github.event_name == 'push'
+        uses: Sibz/github-status-action@v1.1.6
+        with:
+          authToken: ${{ secrets.GITHUB_TOKEN }}
+          state: ${{ steps.summary.outputs.summary }}
+          context: Terraform Plan
+          description: Terraform Plan Summary
+          sha: ${{ github.event.push.head.sha }}
 
   apply:
     name: Terraform apply
-    needs: [ plan ]
+    needs: [plan]
     runs-on: ubuntu-latest
     environment: dev
     defaults:
@@ -158,79 +170,81 @@ jobs:
         working-directory: ${{ env.tf_actions_working_dir }}
 
     steps:
-    - uses: actions/checkout@v2
+      - uses: actions/checkout@v2
 
-    - name: Log in to Azure using OIDC
-      uses: azure/login@v1
-      with:
-        client-id: ${{ secrets.AZURE_CLIENT_ID }}
-        tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-        subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      - name: Log in to Azure using OIDC
+        uses: azure/login@v1
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-    - name: Setup Terraform
-      uses: hashicorp/setup-terraform@v1
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: latest
 
-    - name: Terraform Init
-      id: init
-      run: terraform init
-      env:
-        ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-        ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-        ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-        ARM_USE_OIDC: true
+      - name: Terraform Init
+        id: init
+        run: terraform init
+        env:
+          ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          ARM_USE_OIDC: true
 
-    - name: Download the plan
-      uses: actions/download-artifact@v3
-      with:
-        name: tf-plan
-        path: ${{ env.tf_actions_working_dir }}
+      - name: Download the plan
+        uses: actions/download-artifact@v3
+        with:
+          name: tf-plan
+          path: ${{ env.tf_actions_working_dir }}
 
-    - name: Apply the plan
-      id: apply
-      run: terraform apply -no-color -auto-approve out.tfplan
-      env:
-        ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-        ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-        ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-        ARM_USE_OIDC: true
+      - name: Apply the plan
+        id: apply
+        run: terraform apply -no-color -auto-approve out.tfplan
+        env:
+          ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          ARM_USE_OIDC: true
 
-    - name: Create the plan summary
-      uses: actions/github-script@v6
-      if: always()
-      id: summary
-      env:
-        APPLY: '${{ steps.apply.outputs.stdout }}'
-      with:
-        github-token: ${{ secrets.GITHUB_TOKEN }}
-        script: |
-          // 1. Prep the output
-          const output = `#### Terraform Apply 🚗\`${{ steps.apply.outcome }}\`
+      - name: Create the plan summary
+        uses: actions/github-script@v6
+        if: always()
+        id: summary
+        env:
+          APPLY: "${{ steps.apply.outputs.stdout }}"
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            // 1. Prep the output
+            const output = `#### Terraform Apply 🚗\`${{ steps.apply.outcome }}\`
 
-          <details><summary>Show details</summary>
+            <details><summary>Show details</summary>
 
-          \`\`\`\n
-          ${process.env.APPLY}
-          \`\`\`
+            \`\`\`\n
+            ${process.env.APPLY}
+            \`\`\`
 
-          </details>
+            </details>
 
-          *Pusher: @${{ github.actor }}, Action: \`${{ github.event_name }}\`, Working Directory: \`${{ env.tf_actions_working_dir }}\`, Workflow: \`${{ github.workflow }}\`*`;
+            *Pusher: @${{ github.actor }}, Action: \`${{ github.event_name }}\`, Working Directory: \`${{ env.tf_actions_working_dir }}\`, Workflow: \`${{ github.workflow }}\`*`;
 
-          // 2. Set the output variable
-          const fs = require('fs');
-          fs.writeFileSync('${{ env.tf_actions_working_dir }}/summary.md', output);
-          core.setOutput('summary', output);
+            // 2. Set the output variable
+            const fs = require('fs');
+            fs.writeFileSync('${{ env.tf_actions_working_dir }}/summary.md', output);
+            core.setOutput('summary', output);
 
-    - name: Write the step summary
-      if: always()
-      run: cat summary.md >> $GITHUB_STEP_SUMMARY
+      - name: Write the step summary
+        if: always()
+        run: cat summary.md >> $GITHUB_STEP_SUMMARY
 
-    - name: Publish apply as a status
-      if: github.event_name == 'push'
-      uses: Sibz/github-status-action@v1.1.6
-      with:
-        authToken: ${{ secrets.GITHUB_TOKEN }}
-        state: ${{ steps.summary.outputs.summary }}
-        context: Terraform Plan
-        description: Terraform Plan Summary
-        sha: ${{ github.event.push.head.sha }}
+      - name: Publish apply as a status
+        if: github.event_name == 'push'
+        uses: Sibz/github-status-action@v1.1.6
+        with:
+          authToken: ${{ secrets.GITHUB_TOKEN }}
+          state: ${{ steps.summary.outputs.summary }}
+          context: Terraform Plan
+          description: Terraform Plan Summary
+          sha: ${{ github.event.push.head.sha }}
