@@ -77,6 +77,7 @@ jobs:
           -backend-config="resource_group_name=${{ steps.keyvault.outputs.resource-group-name }}"
           -backend-config="storage_account_name=${{ steps.keyvault.outputs.storage-account-name }}"
           -backend-config="container_name=${{ steps.keyvault.outputs.container-name }}"
+          -backend-config="use_oidc=true"
           -backend-config="key=${{ steps.keyvault.outputs.key }}"
 
       - name: Terraform Validate
