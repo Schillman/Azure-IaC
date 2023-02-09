@@ -92,7 +92,7 @@ jobs:
           else
             echo "{val}={ }" >> $GITHUB_OUTPUT
           fi
-          env:
+        env:
           DESTROY: ${{ github.event.inputs.destroy }}
 
       - name: Terraform Plan
