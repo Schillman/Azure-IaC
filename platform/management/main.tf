@@ -31,16 +31,22 @@ module "prepare_governance" {
 resource "azurerm_key_vault" "keyvault" {
   for_each = var.key_vaults
 
-  name                        = each.key
-  location                    = module.prepare_governance.mgmt_rg.location
-  resource_group_name         = module.prepare_governance.mgmt_rg.name
-  enabled_for_disk_encryption = true
-  tenant_id                   = data.azurerm_client_config.current.tenant_id
-  soft_delete_retention_days  = 7
-  purge_protection_enabled    = false
+  name                       = each.key
+  location                   = module.prepare_governance.mgmt_rg.location
+  resource_group_name        = module.prepare_governance.mgmt_rg.name
+  tenant_id                  = data.azurerm_client_config.current.tenant_id
+  sku_name                   = "standard"
+  soft_delete_retention_days = 7
 
-  sku_name                  = "standard"
-  enable_rbac_authorization = true
+  public_network_access_enabled = true
+  enabled_for_disk_encryption   = true
+  enable_rbac_authorization     = true
+  purge_protection_enabled      = true
+
+  network_acls {
+    bypass         = "AzureServices"
+    default_action = "Deny"
+  }
 }
 
 resource "azurerm_role_assignment" "kv_access" {

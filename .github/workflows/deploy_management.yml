@@ -1,3 +1,4 @@
+---
 name: platform/management deploy
 
 on:
@@ -43,20 +44,14 @@ jobs:
       - uses: Azure/get-keyvault-secrets@v1
         with:
           keyvault: ${{ env.key_vault }} # name of key vault in Azure portal
+          # yamllint disable rule:line-length
           secrets: "tenant-id, key, storage-account-name, container-name, resource-group-name, subscription-id, tf-secrets-json" # comma separated list of secret keys to fetch from key vault
+        # yamllint enable rule:line-length
         id: keyvault # ID for secrets that you will reference
 
       - name: Create JSON file from the tf-secrets-json secret value.
         run: |
          echo ${{ steps.keyvault.outputs.tf-secrets-json }} > tf_secret.json
-
-      - name: Prep environment variables for terraform
-        run: |
-          {
-            echo "ARM_CLIENT_ID=${{ secrets.ARM_CLIENT_ID }}"
-            echo "ARM_SUBSCRIPTION_ID=${{ secrets.ARM_SUBSCRIPTION_ID }}"
-            echo "ARM_TENANT_ID=${{ secrets.ARM_TENANT_ID }}"
-          } >> $GITHUB_ENV
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
@@ -94,11 +89,11 @@ jobs:
         id: destroy_arg
         run: |
           if [ $DESTROY == "true" ]; then
-            echo "::set-output name=val::-destroy"
+            echo "{val}={-destroy}" >> $GITHUB_OUTPUT
           else
-            echo "::set-output name=val:: "
+            echo "{val}={ }" >> $GITHUB_OUTPUT
           fi
-        env:
+          env:
           DESTROY: ${{ github.event.inputs.destroy }}
 
       - name: Terraform Plan
@@ -142,7 +137,10 @@ jobs:
 
             </details>
 
-            *Pusher: @${{ github.actor }}, Action: \`${{ github.event_name }}\`, Working Directory: \`${{ env.tf_actions_working_dir }}\`, Workflow: \`${{ github.workflow }}\`*`;
+            *Pusher: @${{ github.actor }},
+            Action: \`${{ github.event_name }}\`,
+            Working Directory: \`${{ env.tf_actions_working_dir }}\`,
+            Workflow: \`${{ github.workflow }}\`*`;
 
             // 2. Set the output variable
             const fs = require('fs');
@@ -237,7 +235,10 @@ jobs:
 
             </details>
 
-            *Pusher: @${{ github.actor }}, Action: \`${{ github.event_name }}\`, Working Directory: \`${{ env.tf_actions_working_dir }}\`, Workflow: \`${{ github.workflow }}\`*`;
+            *Pusher: @${{ github.actor }},
+            Action: \`${{ github.event_name }}\`,
+            Working Directory: \`${{ env.tf_actions_working_dir }}\`,
+            Workflow: \`${{ github.workflow }}\`*`;
 
             // 2. Set the output variable
             const fs = require('fs');

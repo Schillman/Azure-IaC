@@ -48,8 +48,8 @@ resource "azurerm_network_security_group" "network" {
 }
 
 resource "azurerm_network_security_rule" "network" {
-  for_each = {for rule in local.security_rules : rule.name => rule
-   if rule.name != ""
+  for_each = { for rule in local.security_rules : rule.name => rule
+    if rule.name != ""
   }
 
   name                        = each.value.name

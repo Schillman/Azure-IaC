@@ -25,7 +25,7 @@ variable "deploy_management_resources" {
 }
 
 variable "management_subscription_id" {
-  type    = string
+  type = string
 }
 
 variable "management_resource_group_name" {
@@ -49,5 +49,5 @@ variable "log_retention_in_days" {
 }
 
 variable "security_alerts_email_address" {
-  type    = string
+  type = string
 }

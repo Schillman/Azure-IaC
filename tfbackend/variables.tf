@@ -24,7 +24,7 @@ variable "rg_tfbackend" {
 }
 
 variable "management_subscription_id" {
-  type    = string
+  type = string
 }
 
 variable "st_tfbackend" {
