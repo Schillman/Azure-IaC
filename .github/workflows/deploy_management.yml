@@ -51,7 +51,7 @@ jobs:
 
       - name: Create JSON file from the tf-secrets-base64 secret value.
         run: |
-         echo ${{ steps.keyvault.outputs.tf-secrets-base64 }} | base64 --decode > tf_secrets.json
+         echo "${{ steps.keyvault.outputs.tf-secrets-base64 }}" | base64 --decode > tf_secrets.json
 
       - name: Prep environment variables for terraform
         run: |
