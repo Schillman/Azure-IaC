@@ -49,7 +49,7 @@ jobs:
         with:
           azcliversion: 2.44.1
           inlineScript: |
-            az keyvault secret download --vault-name ${{ env.key_vault }} -n tf-secrets-base64 --f tf-secrets.decoded.json -e base64
+            az keyvault secret download --vault-name ${{ env.key_vault }} -n tf-secrets-base64 --f $GITHUB_WORKSPACE/tf-secrets.decoded.json -e base64
 
       - uses: Azure/get-keyvault-secrets@v1
         with:
@@ -103,7 +103,7 @@ jobs:
 
       - name: Terraform Plan
         id: plan
-        run: terraform plan -var-file=tf-secrets.decoded.json $DESTROY -no-color --out=out.tfplan
+        run: terraform plan -var-file=$GITHUB_WORKSPACE/tf-secrets.decoded.json $DESTROY -no-color --out=out.tfplan
         env:
           ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
           ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
