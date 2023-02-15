@@ -18,6 +18,10 @@ variable "tags" {
   default = {}
 }
 
+variable "public_ip" {
+  type = string
+}
+
 # Management variables
 variable "management_subscription_id" {
   type = string

@@ -44,8 +44,9 @@ resource "azurerm_key_vault" "keyvault" {
   purge_protection_enabled      = true
 
   network_acls {
-    bypass         = "AzureServices"
     default_action = "Deny"
+    bypass         = "AzureServices"
+    ip_rules       = [var.public_ip]
   }
 }
 
