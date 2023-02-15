@@ -41,17 +41,23 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
+      - name: Checkout
+        uses: actions/checkout@v1
+
+      - name: Azure CLI script
+        uses: azure/CLI@v1
+        with:
+          azcliversion: 2.44.1
+          inlineScript: |
+            az keyvault secret download --vault-name ${{ env.key_vault }} -n tf-secrets-base64 --f tf-secrets.decoded.json -e base64
+
       - uses: Azure/get-keyvault-secrets@v1
         with:
           keyvault: ${{ env.key_vault }} # name of key vault in Azure portal
           # yamllint disable rule:line-length
           secrets: "tenant-id, key, storage-account-name, container-name, resource-group-name, subscription-id, tf-secrets-base64" # comma separated list of secret keys to fetch from key vault
-        # yamllint enable rule:line-length
+          # yamllint enable rule:line-length
         id: keyvault # ID for secrets that you will reference
-
-      - name: Create JSON file from the tf-secrets-base64 secret value.
-        run: |
-         echo "${{ steps.keyvault.outputs.tf-secrets-base64 }}" | base64 --decode > tf_secrets.json
 
       - name: Prep environment variables for terraform
         run: |
@@ -97,7 +103,7 @@ jobs:
 
       - name: Terraform Plan
         id: plan
-        run: terraform plan -var-file=tf_secrets.json $DESTROY -no-color --out=out.tfplan
+        run: terraform plan -var-file=tf-secrets.decoded.json $DESTROY -no-color --out=out.tfplan
         env:
           ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
           ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
