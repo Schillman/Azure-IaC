@@ -160,7 +160,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: tf-plan
-          path: ${{ env.working_dir }}/out.tfplan
+          path: $GITHUB_WORKSPACE/out.tfplan
 
       - name: Publish plan as a status
         if: github.event_name == 'push'
@@ -227,11 +227,11 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: tf-plan
-          path: ${{ env.working_dir }}
+          path: $GITHUB_WORKSPACE
 
       - name: Apply the plan
         id: apply
-        run: terraform apply -var-file=$GITHUB_WORKSPACE/tf-secrets.decoded.json --out=${{ env.working_dir }}/out.tfplan -no-color -auto-approve
+        run: terraform apply -var-file=$GITHUB_WORKSPACE/tf-secrets.decoded.json --out=$GITHUB_WORKSPACE/out.tfplan -no-color -auto-approve
         env:
           ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
           ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
