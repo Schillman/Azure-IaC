@@ -93,14 +93,14 @@ jobs:
           if [ $DESTROY == "true" ]; then
             echo "{val}={-destroy}" >> $GITHUB_OUTPUT
           else
-            echo "{val}={ }" >> $GITHUB_OUTPUT
+            echo "{val}={}" >> $GITHUB_OUTPUT
           fi
         env:
           DESTROY: ${{ github.event.inputs.destroy }}
 
       - name: Terraform Plan
         id: plan
-        run: terraform plan -var-file=$GITHUB_WORKSPACE/tf-secrets.decoded.json $DESTROY -no-color -out=tfplan¨
+        run: terraform plan -var-file=$GITHUB_WORKSPACE/tf-secrets.decoded.json $DESTROY -no-color -out=tfplan
         env:
           ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
           ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
