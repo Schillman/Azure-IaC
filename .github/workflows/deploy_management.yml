@@ -130,7 +130,7 @@ jobs:
           steps.tfplan.outcome != 'failure'
         with:
           name: ${{ format('{0}-tfplan', github.run_number) }}
-          path: /home/runner/work/Azure-IaC/Azure-IaC/***/management/out.tfplan
+          path: ~/runner/work/Azure-IaC/Azure-IaC/platform/management/out.tfplan
           retention-days: 5
 
       - name: Upload the plan
@@ -140,8 +140,19 @@ jobs:
           steps.tfplan.outcome != 'failure'
         with:
           name: ${{ format('{0}-tfplan', github.run_number) }}
-          path: /home/runner/work/Azure-IaC/Azure-IaC/***/management/artifacts/out.tfplan
+          path: /home/runner/work/Azure-IaC/Azure-IaC/platform/management/artifacts/
           retention-days: 5
+
+      - name: Upload the plan
+        uses: actions/upload-artifact@v3
+        id: tfplanupload4
+        if: |
+          steps.tfplan.outcome != 'failure'
+        with:
+          name: ${{ format('{0}-tfplan', github.run_number) }}
+          path: ./out.tfplan
+          retention-days: 5
+
       - name: Debug
         run: |
           pwd
