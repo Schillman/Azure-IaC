@@ -41,10 +41,9 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-      - name: Azure CLI script
+      - name: Download -var-file for terraform plan/apply
         uses: azure/CLI@v1
         with:
-          azcliversion: 2.44.1
           inlineScript: |
             az keyvault secret download --vault-name ${{ env.key_vault }} -n tf-secrets-base64 --f $GITHUB_WORKSPACE/tf-secrets.json -e base64
             base64 -d $GITHUB_WORKSPACE/tf-secrets.json > $GITHUB_WORKSPACE/tf-secrets.decoded.json
@@ -53,7 +52,7 @@ jobs:
         with:
           keyvault: ${{ env.key_vault }} # name of key vault in Azure portal
           # yamllint disable rule:line-length
-          secrets: "tenant-id, key, storage-account-name, container-name, resource-group-name, subscription-id, tf-secrets-base64" # comma separated list of secret keys to fetch from key vault
+          secrets: "tenant-id, key, storage-account-name, container-name, resource-group-name, subscription-id" # comma separated list of secret keys to fetch from key vault
           # yamllint enable rule:line-length
         id: keyvault # ID for secrets that you will reference
 
@@ -76,13 +75,15 @@ jobs:
       - name: Terraform Init
         id: init
         run:
-          terraform init -backend-config="tenant_id=${{ steps.keyvault.outputs.tenant-id }}"
-          -backend-config="subscription_id=${{ steps.keyvault.outputs.subscription-id }}"
-          -backend-config="resource_group_name=${{ steps.keyvault.outputs.resource-group-name }}"
+          terraform init -backend-config="resource_group_name=${{ steps.keyvault.outputs.resource-group-name }}"
           -backend-config="storage_account_name=${{ steps.keyvault.outputs.storage-account-name }}"
           -backend-config="container_name=${{ steps.keyvault.outputs.container-name }}"
-          -backend-config="use_oidc=true"
           -backend-config="key=${{ steps.keyvault.outputs.key }}"
+        env:
+          ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          ARM_USE_OIDC: true
 
       - name: Terraform Validate
         id: validate
@@ -141,6 +142,7 @@ jobs:
             </details>
 
             *Pusher: @${{ github.actor }},
+            --
             Action: \`${{ github.event_name }}\`,
             Working Directory: \`${{ env.tf_actions_working_dir }}\`,
             Workflow: \`${{ github.workflow }}\`*`;
@@ -180,7 +182,7 @@ jobs:
         working-directory: ${{ env.tf_actions_working_dir }}
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Log in to Azure using OIDC
         uses: azure/login@v1
@@ -189,6 +191,21 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
+      - name: Download -var-file for terraform plan/apply
+        uses: azure/CLI@v1
+        with:
+          inlineScript: |
+            az keyvault secret download --vault-name ${{ env.key_vault }} -n tf-secrets-base64 --f $GITHUB_WORKSPACE/tf-secrets.json -e base64
+            base64 -d $GITHUB_WORKSPACE/tf-secrets.json > $GITHUB_WORKSPACE/tf-secrets.decoded.json
+
+      - uses: Azure/get-keyvault-secrets@v1
+        with:
+          keyvault: ${{ env.key_vault }} # name of key vault in Azure portal
+          # yamllint disable rule:line-length
+          secrets: "key, storage-account-name, container-name, resource-group-name" # comma separated list of secret keys to fetch from key vault
+          # yamllint enable rule:line-length
+        id: keyvault # ID for secrets that you will reference
+
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
         with:
@@ -196,7 +213,10 @@ jobs:
 
       - name: Terraform Init
         id: init
-        run: terraform init
+        run: terraform init -backend-config="resource_group_name=${{ steps.keyvault.outputs.resource-group-name }}"
+          -backend-config="storage_account_name=${{ steps.keyvault.outputs.storage-account-name }}"
+          -backend-config="container_name=${{ steps.keyvault.outputs.container-name }}"
+          -backend-config="key=${{ steps.keyvault.outputs.key }}"
         env:
           ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
           ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
@@ -211,7 +231,7 @@ jobs:
 
       - name: Apply the plan
         id: apply
-        run: terraform apply -no-color -auto-approve out.tfplan
+        run: terraform apply -var-file=$GITHUB_WORKSPACE/tf-secrets.decoded.json --out=out.tfplan -no-color -auto-approve
         env:
           ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
           ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
@@ -239,6 +259,7 @@ jobs:
             </details>
 
             *Pusher: @${{ github.actor }},
+            ---
             Action: \`${{ github.event_name }}\`,
             Working Directory: \`${{ env.tf_actions_working_dir }}\`,
             Workflow: \`${{ github.workflow }}\`*`;
