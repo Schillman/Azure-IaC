@@ -99,12 +99,13 @@ jobs:
           DESTROY: ${{ github.event.inputs.destroy }}
 
       - name: Terraform Plan
-        id: plan
+        id: tfplan
         run: |
           terraform plan \
             -var-file=$GITHUB_WORKSPACE/tf-secrets.decoded.json \
             $DESTROY \
             -no-color -out=out.tfplan
+            mkdir artifacts && cp out.tfplan artifacts/
         env:
           ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
           ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
@@ -117,7 +118,7 @@ jobs:
         if: always()
         id: summary
         env:
-          PLAN: "${{ steps.plan.outputs.stdout }}"
+          PLAN: "${{ steps.tfplan.outputs.stdout }}"
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
@@ -133,7 +134,7 @@ jobs:
 
             </details>
 
-            #### Terraform Plan 📖\`${{ steps.plan.outcome }}\`
+            #### Terraform Plan 📖\`${{ steps.tfplan.outcome }}\`
 
             <details><summary>Show Plan</summary>
 
@@ -162,10 +163,10 @@ jobs:
         uses: actions/upload-artifact@v3
         id: tfplanupload
         if: |
-          steps.plan.outcome != 'failure'
+          steps.tfplan.outcome != 'failure'
         with:
           name: ${{ format('{0}-tfplan', github.run_number) }}
-          path: out.tfplan
+          path: artifacts/out.tfplan
           retention-days: 5
       - name: Debug
         run: |
