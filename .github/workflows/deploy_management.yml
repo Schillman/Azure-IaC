@@ -105,7 +105,7 @@ jobs:
             -var-file=$GITHUB_WORKSPACE/tf-secrets.decoded.json \
             $DESTROY \
             -no-color -out=out.tfplan
-            mkdir artifacts && mv out.tfplan artifacts/
+            mkdir artifacts && cp out.tfplan artifacts/
         env:
           ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
           ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
@@ -115,14 +115,33 @@ jobs:
 
       - name: Upload the plan
         uses: actions/upload-artifact@v3
-        id: tfplanupload
+        id: tfplanupload1
         if: |
           steps.tfplan.outcome != 'failure'
         with:
           name: ${{ format('{0}-tfplan', github.run_number) }}
-          path: artifacts/
+          path: artifacts/out.tfplan
           retention-days: 5
 
+      - name: Upload the plan
+        uses: actions/upload-artifact@v3
+        id: tfplanupload2
+        if: |
+          steps.tfplan.outcome != 'failure'
+        with:
+          name: ${{ format('{0}-tfplan', github.run_number) }}
+          path: /home/runner/work/Azure-IaC/Azure-IaC/***/management/out.tfplan
+          retention-days: 5
+
+      - name: Upload the plan
+        uses: actions/upload-artifact@v3
+        id: tfplanupload3
+        if: |
+          steps.tfplan.outcome != 'failure'
+        with:
+          name: ${{ format('{0}-tfplan', github.run_number) }}
+          path: /home/runner/work/Azure-IaC/Azure-IaC/***/management/artifacts/out.tfplan
+          retention-days: 5
       - name: Debug
         run: |
           pwd
