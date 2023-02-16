@@ -104,8 +104,7 @@ jobs:
           terraform plan \
             -var-file=$GITHUB_WORKSPACE/tf-secrets.decoded.json \
             $DESTROY \
-            -no-color -out=out.tfplan
-            mkdir artifacts && cp out.tfplan artifacts/
+            -no-color -out=/home/runner/work/Azure-IaC/Azure-IaC/artifacts/out.tfplanR32
         env:
           ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
           ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
@@ -120,7 +119,7 @@ jobs:
           steps.tfplan.outcome != 'failure'
         with:
           name: ${{ format('{0}-tfplan', github.run_number) }}
-          path: /home/runner/work/Azure-IaC/Azure-IaC/platform/management/artifacts/
+          path: /home/runner/work/Azure-IaC/Azure-IaC/artifacts
           retention-days: 5
 
       - name: Create the plan summary
@@ -224,13 +223,13 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: ${{ format('{0}-tfplan', github.run_number) }}
-          path: artifacts
+          path: /home/runner/work/Azure-IaC/Azure-IaC/artifacts
 
       - name: Apply the plan
         id: apply
         run: |
           terraform apply -auto-approve \
-            -no-color artifacts/out.tfplan
+            -no-color /home/runner/work/Azure-IaC/Azure-IaC/artifacts/out.tfplan
         env:
           ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
           ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
