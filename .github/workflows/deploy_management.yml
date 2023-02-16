@@ -104,23 +104,14 @@ jobs:
           terraform plan \
             -var-file=$GITHUB_WORKSPACE/tf-secrets.decoded.json \
             $DESTROY -no-color -out=out.tfplan
-            mv out.tfplan $GITHUB_WORKSPACE
+            mv out.tfplan $GITHUB_WORKSPACE/out.tfplan
+            ls $GITHUB_WORKSPACE -R
         env:
           ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
           ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
           ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
           ARM_USE_OIDC: true
           DESTROY: ${{ steps.destroy_arg.outputs.val }}
-
-      - name: Upload the plan
-        uses: actions/upload-artifact@v3
-        id: tfplanupload
-        if: |
-          steps.tfplan.outcome != 'failure'
-        with:
-          name: ${{ format('{0}-tfplan', github.run_number) }}
-          path: $GITHUB_WORKSPACE/out.tfplan
-          retention-days: 5
 
       - name: Create the plan summary
         uses: actions/github-script@v6
@@ -167,6 +158,16 @@ jobs:
       - name: Write the step summary
         if: always()
         run: cat summary.md >> $GITHUB_STEP_SUMMARY
+
+      - name: Upload the plan
+        uses: actions/upload-artifact@v3
+        id: tfplanupload
+        if: |
+          steps.tfplan.outcome != 'failure'
+        with:
+          name: ${{ format('{0}-tfplan', github.run_number) }}
+          path: $GITHUB_WORKSPACE/out.tfplan
+          retention-days: 5
 
       - name: Publish plan as a status
         if: github.event_name == 'push'
