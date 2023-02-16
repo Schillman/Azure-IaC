@@ -46,14 +46,14 @@ jobs:
         uses: azure/CLI@v1
         with:
           inlineScript: |
-            az keyvault secret download --vault-name ${{ env.key_vault }} -n tf-secrets-base64 --f $GITHUB_WORKSPACE/tf-secrets.json -e base64
-            base64 -d $GITHUB_WORKSPACE/tf-secrets.json > $GITHUB_WORKSPACE/tf-secrets.decoded.json
+            az keyvault secret download --vault-name ${{ env.key_vault }} -n tf-secrets-base64 --f $GITHUB_WORKSPACE/tf-secrets.txt -e base64
+            base64 -d $GITHUB_WORKSPACE/tf-secrets.txt > $GITHUB_WORKSPACE/tf-secrets.decoded.json
 
       - uses: Azure/get-keyvault-secrets@v1
         with:
           keyvault: ${{ env.key_vault }} # name of key vault in Azure portal
           # yamllint disable rule:line-length
-          secrets: "tenant-id, key, storage-account-name, container-name, resource-group-name, subscription-id" # comma separated list of secret keys to fetch from key vault
+          secrets: "key, storage-account-name, container-name, resource-group-name" # comma separated list of secret keys to fetch from key vault
           # yamllint enable rule:line-length
         id: keyvault # ID for secrets that you will reference
 
@@ -103,8 +103,8 @@ jobs:
         run: |
           terraform plan \
             -var-file=$GITHUB_WORKSPACE/tf-secrets.decoded.json \
-            $DESTROY \
-            -no-color -out=/home/runner/work/Azure-IaC/Azure-IaC/artifacts/out.tfplan
+            $DESTROY -no-color -out=out.tfplan
+            mv out.tfplan $GITHUB_WORKSPACE
         env:
           ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
           ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
@@ -119,7 +119,7 @@ jobs:
           steps.tfplan.outcome != 'failure'
         with:
           name: ${{ format('{0}-tfplan', github.run_number) }}
-          path: /home/runner/work/Azure-IaC/Azure-IaC/artifacts
+          path: $GITHUB_WORKSPACE/out.tfplan
           retention-days: 5
 
       - name: Create the plan summary
@@ -167,7 +167,6 @@ jobs:
       - name: Write the step summary
         if: always()
         run: cat summary.md >> $GITHUB_STEP_SUMMARY
-
 
       - name: Publish plan as a status
         if: github.event_name == 'push'
@@ -223,13 +222,13 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: ${{ format('{0}-tfplan', github.run_number) }}
-          path: /home/runner/work/Azure-IaC/Azure-IaC/artifacts
+          path: $GITHUB_WORKSPACE/out.tfplan
 
       - name: Apply the plan
         id: apply
         run: |
           terraform apply -auto-approve \
-            -no-color /home/runner/work/Azure-IaC/Azure-IaC/artifacts/out.tfplan
+            -no-color $GITHUB_WORKSPACE/out.tfplan
         env:
           ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
           ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
