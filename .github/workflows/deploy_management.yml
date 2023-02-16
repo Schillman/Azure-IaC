@@ -169,7 +169,7 @@ jobs:
           retention-days: 5
       - name: Debug
         run: |
-          pwd \
+          pwd
           ls -R
 
       - name: Publish plan as a status
