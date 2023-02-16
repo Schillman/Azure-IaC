@@ -120,7 +120,7 @@ jobs:
           steps.tfplan.outcome != 'failure'
         with:
           name: ${{ format('{0}-tfplan', github.run_number) }}
-          path: artifacts
+          path: artifacts/
           retention-days: 5
 
       - name: Debug
