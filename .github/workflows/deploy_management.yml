@@ -33,6 +33,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
+      - uses: hashicorp/setup-terraform@v2
 
       - name: Log in to Azure using OIDC
         uses: azure/login@v1
@@ -63,9 +64,6 @@ jobs:
             echo "ARM_SUBSCRIPTION_ID=${{ secrets.ARM_SUBSCRIPTION_ID }}"
             echo "ARM_TENANT_ID=${{ secrets.ARM_TENANT_ID }}"
           } >> $GITHUB_ENV
-
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v2
 
       - name: Terraform fmt
         id: fmt
@@ -102,7 +100,7 @@ jobs:
 
       - name: Terraform Plan
         id: plan
-        run: terraform plan -var-file=$GITHUB_WORKSPACE/tf-secrets.decoded.json $DESTROY -no-color --out=$GITHUB_WORKSPACE/out.tfplan
+        run: terraform plan -var-file=$GITHUB_WORKSPACE/tf-secrets.decoded.json $DESTROY -no-color -out=tfplan¨
         env:
           ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
           ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
@@ -160,7 +158,8 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: tf-plan
-          path: $GITHUB_WORKSPACE/out.tfplan
+          path: tfplan
+          if-no-files-found: error
 
       - name: Publish plan as a status
         if: github.event_name == 'push'
@@ -183,6 +182,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
+      - uses: hashicorp/setup-terraform@v2
 
       - name: Log in to Azure using OIDC
         uses: azure/login@v1
@@ -191,13 +191,6 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-      - name: Download -var-file for terraform plan/apply
-        uses: azure/CLI@v1
-        with:
-          inlineScript: |
-            az keyvault secret download --vault-name ${{ env.key_vault }} -n tf-secrets-base64 --f $GITHUB_WORKSPACE/tf-secrets.json -e base64
-            base64 -d $GITHUB_WORKSPACE/tf-secrets.json > $GITHUB_WORKSPACE/tf-secrets.decoded.json
-
       - uses: Azure/get-keyvault-secrets@v1
         with:
           keyvault: ${{ env.key_vault }} # name of key vault in Azure portal
@@ -205,11 +198,6 @@ jobs:
           secrets: "key, storage-account-name, container-name, resource-group-name" # comma separated list of secret keys to fetch from key vault
           # yamllint enable rule:line-length
         id: keyvault # ID for secrets that you will reference
-
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v2
-        with:
-          terraform_version: latest
 
       - name: Terraform Init
         id: init
@@ -227,11 +215,10 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: tf-plan
-          path: $GITHUB_WORKSPACE
 
       - name: Apply the plan
         id: apply
-        run: terraform apply -var-file=$GITHUB_WORKSPACE/tf-secrets.decoded.json --out=$GITHUB_WORKSPACE/out.tfplan -no-color -auto-approve
+        run: terraform apply tfplan -no-color -auto-approve
         env:
           ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
           ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
