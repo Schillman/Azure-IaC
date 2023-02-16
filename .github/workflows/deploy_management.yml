@@ -100,7 +100,11 @@ jobs:
 
       - name: Terraform Plan
         id: plan
-        run: terraform plan -var-file=$GITHUB_WORKSPACE/tf-secrets.decoded.json $DESTROY -no-color -out=out.tfplan
+        run: |
+          terraform plan \
+            -var-file=$GITHUB_WORKSPACE/tf-secrets.decoded.json \
+            $DESTROY \
+            -no-color -out=out.tfplan
         env:
           ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
           ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
@@ -156,7 +160,11 @@ jobs:
 
       - name: Upload the plan
         uses: actions/upload-artifact@v3
+        id: tfplanupload
+        if: |
+          steps.plan.outcome != 'failure'
         with:
+          name: ${{ format('{0}-tfplan', github.run_number) }}
           path: out.tfplan
           retention-days: 5
           if-no-files-found: error
@@ -213,10 +221,14 @@ jobs:
 
       - name: Download the plan
         uses: actions/download-artifact@v3
+        with:
+          name: ${{ format('{0}-tfplan', github.run_number) }}
 
       - name: Apply the plan
         id: apply
-        run: terraform apply out.tfplan -no-color -auto-approve
+        run: |
+          terraform apply out.tfplan \
+            -no-color -auto-approve
         env:
           ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
           ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
