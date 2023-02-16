@@ -167,7 +167,10 @@ jobs:
           name: ${{ format('{0}-tfplan', github.run_number) }}
           path: out.tfplan
           retention-days: 5
-          if-no-files-found: error
+      - name: Debug
+        run: |
+          pwd \
+          ls -R
 
       - name: Publish plan as a status
         if: github.event_name == 'push'
