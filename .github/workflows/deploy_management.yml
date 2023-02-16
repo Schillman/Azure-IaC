@@ -104,7 +104,7 @@ jobs:
           terraform plan \
             -var-file=$GITHUB_WORKSPACE/tf-secrets.decoded.json \
             $DESTROY \
-            -no-color -out=/home/runner/work/Azure-IaC/Azure-IaC/artifacts/out.tfplanR32
+            -no-color -out=/home/runner/work/Azure-IaC/Azure-IaC/artifacts/out.tfplan
         env:
           ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
           ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
