@@ -15,7 +15,7 @@ on:
       - platform/management/**
 
 env:
-  tf_actions_working_dir: platform/management
+  working_dir: platform/management
   key_vault: kv-schillman-management
 
 permissions:
@@ -29,7 +29,7 @@ jobs:
     environment: tfplan
     defaults:
       run:
-        working-directory: ${{ env.tf_actions_working_dir }}
+        working-directory: ${{ env.working_dir }}
 
     steps:
       - uses: actions/checkout@v3
@@ -144,12 +144,12 @@ jobs:
             *Pusher: @${{ github.actor }},
             --
             Action: \`${{ github.event_name }}\`,
-            Working Directory: \`${{ env.tf_actions_working_dir }}\`,
+            Working Directory: \`${{ env.working_dir }}\`,
             Workflow: \`${{ github.workflow }}\`*`;
 
             // 2. Set the output variable
             const fs = require('fs');
-            fs.writeFileSync('${{ env.tf_actions_working_dir }}/summary.md', output);
+            fs.writeFileSync('${{ env.working_dir }}/summary.md', output);
             core.setOutput('summary', output);
 
       - name: Write the step summary
@@ -160,7 +160,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: tf-plan
-          path: ${{ env.tf_actions_working_dir }}/out.tfplan
+          path: ${{ env.working_dir }}/out.tfplan
 
       - name: Publish plan as a status
         if: github.event_name == 'push'
@@ -179,7 +179,7 @@ jobs:
     environment: tfapply
     defaults:
       run:
-        working-directory: ${{ env.tf_actions_working_dir }}
+        working-directory: ${{ env.working_dir }}
 
     steps:
       - uses: actions/checkout@v3
@@ -227,11 +227,11 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: tf-plan
-          path: ${{ env.tf_actions_working_dir }}
+          path: ${{ env.working_dir }}
 
       - name: Apply the plan
         id: apply
-        run: terraform apply -var-file=$GITHUB_WORKSPACE/tf-secrets.decoded.json --out=out.tfplan -no-color -auto-approve
+        run: terraform apply -var-file=$GITHUB_WORKSPACE/tf-secrets.decoded.json --out=${{ env.working_dir }}/out.tfplan -no-color -auto-approve
         env:
           ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
           ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
@@ -261,12 +261,12 @@ jobs:
             *Pusher: @${{ github.actor }},
             ---
             Action: \`${{ github.event_name }}\`,
-            Working Directory: \`${{ env.tf_actions_working_dir }}\`,
+            Working Directory: \`${{ env.working_dir }}\`,
             Workflow: \`${{ github.workflow }}\`*`;
 
             // 2. Set the output variable
             const fs = require('fs');
-            fs.writeFileSync('${{ env.tf_actions_working_dir }}/summary.md', output);
+            fs.writeFileSync('${{ env.working_dir }}/summary.md', output);
             core.setOutput('summary', output);
 
       - name: Write the step summary
