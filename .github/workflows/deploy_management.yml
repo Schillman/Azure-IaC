@@ -120,15 +120,13 @@ jobs:
           steps.tfplan.outcome != 'failure'
         with:
           name: ${{ format('{0}-tfplan', github.run_number) }}
-          path: artifacts/out.tfplan
+          path: artifacts
           retention-days: 5
 
       - name: Debug
         run: |
           pwd
-          ls
-          cd artifacts/
-          ls
+          ls -R
 
       - name: Create the plan summary
         uses: actions/github-script@v6
@@ -231,6 +229,7 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: ${{ format('{0}-tfplan', github.run_number) }}
+          path: artifacts
 
       - name: Apply the plan
         id: apply
