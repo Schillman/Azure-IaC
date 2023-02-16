@@ -230,7 +230,7 @@ jobs:
         id: apply
         run: |
           terraform apply -auto-approve \
-            -no-color out.tfplan
+            -no-color artifacts/out.tfplan
         env:
           ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
           ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
