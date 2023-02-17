@@ -219,7 +219,7 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: ${{ format('{0}-tfplan', github.run_number) }}
-          path: ${{ github.workspace }}/out.tfplan
+          # path: ${{ github.workspace }}/out.tfplan
 
       - name: Apply the plan
         id: apply
