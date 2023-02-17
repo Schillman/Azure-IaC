@@ -58,11 +58,10 @@ jobs:
       - name: Prep environment variables for terraform
         run: |
           {
-            echo "ARM_CLIENT_ID=${{ secrets.ARM_CLIENT_ID }}"
-            echo "ARM_SUBSCRIPTION_ID=${{ secrets.ARM_SUBSCRIPTION_ID }}"
-            echo "ARM_TENANT_ID=${{ secrets.ARM_TENANT_ID }}"
+            echo "ARM_TENANT_ID=${{ secrets.AZURE_TENANT_ID }}"
+            echo "ARM_SUBSCRIPTION_ID=${{ secrets.AZURE_SUBSCRIPTION_ID }}"
+            echo "ARM_CLIENT_ID=${{ secrets.AZURE_CLIENT_ID }}"
           } >> $GITHUB_ENV
-          ls $GITHUB_WORKSPACE -R
 
       - name: Terraform fmt
         id: fmt
@@ -100,6 +99,7 @@ jobs:
       - name: Terraform Plan
         id: plan
         run: |
+          echo $GITHUB_WORKSPACE
           terraform plan \
             -var-file=$GITHUB_WORKSPACE/tf-secrets.decoded.json \
             $DESTROY -no-color -out=$GITHUB_WORKSPACE/out.tfplan
