@@ -101,7 +101,7 @@ jobs:
         run: |
           terraform plan \
             -var-file=$GITHUB_WORKSPACE/tf-secrets.decoded.json \
-            $DESTROY -no-color -out=$GITHUB_WORKSPACE/out.tfplan
+            $DESTROY -no-color -out=${{ github.workspace }}/out.tfplan
         env:
           ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
           ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
@@ -219,13 +219,13 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: ${{ format('{0}-tfplan', github.run_number) }}
-          path: $GITHUB_WORKSPACE/out.tfplan
+          path: ${{ github.workspace }}/out.tfplan
 
       - name: Apply the plan
         id: apply
         run: |
           terraform apply -auto-approve \
-            -no-color $GITHUB_WORKSPACE/out.tfplan
+            -no-color ${{ github.workspace }}/out.tfplan
         env:
           ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
           ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
