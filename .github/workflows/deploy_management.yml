@@ -162,7 +162,7 @@ jobs:
           steps.plan.outcome != 'failure'
         with:
           name: ${{ format('{0}-tfplan', github.run_number) }}
-          path: $GITHUB_WORKSPACE/out.tfplan
+          path: ${{ github.workspace }}/out.tfplan
           retention-days: 5
 
       - name: Publish plan as a status
