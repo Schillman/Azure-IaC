@@ -153,7 +153,7 @@ jobs:
 
       - name: Write the step summary
         if: always()
-        run: cat summary.md >> $GITHUB_STEP_SUMMARY
+        run: cat summary.md >> $GITHUB_STEP_SUMMARY ;  echo ${{ steps.summary.outputs.summary }}
 
       - name: Upload the plan
         uses: actions/upload-artifact@v3
