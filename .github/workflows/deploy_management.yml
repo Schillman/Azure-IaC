@@ -42,6 +42,18 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
+      - name: Whitelist GitHub Runner IP
+        uses: azure/CLI@v1
+        with:
+          inlineScript: |
+            set -eu
+            agentIP=$(curl -s https://api.ipify.org/)
+            az storage account network-rule add \
+              --resource-group "${{ secrets.RESOURCE_GROUP }}" \
+              --account-name "${{ secrets.STORAGE_ACCOUNT_NAME }}" \
+              --ip-address $agentIP
+            sleep 20
+
       - name: Download -var-file for terraform plan/apply
         uses: azure/CLI@v1
         with:
@@ -194,6 +206,18 @@ jobs:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Whitelist GitHub Runner IP
+        uses: azure/CLI@v1
+        with:
+          inlineScript: |
+            set -eu
+            agentIP=$(curl -s https://api.ipify.org/)
+            az storage account network-rule add \
+              --resource-group "${{ secrets.RESOURCE_GROUP }}" \
+              --account-name "${{ secrets.STORAGE_ACCOUNT_NAME }}" \
+              --ip-address $agentIP
+            sleep 20
 
       - uses: Azure/get-keyvault-secrets@v1
         with:
