@@ -42,13 +42,13 @@ jobs:
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
       - name: Download -var-file for terraform plan/apply
-        uses: azure/CLI@v1.0.9
+        uses: azure/CLI@v2
         with:
           inlineScript: |
             az keyvault secret download --vault-name ${{ env.key_vault }} -n tf-secrets-base64 --f $GITHUB_WORKSPACE/tf-secrets.txt -e base64
             base64 -d $GITHUB_WORKSPACE/tf-secrets.txt > $GITHUB_WORKSPACE/tf-secrets.decoded.json
 
-      - uses: Azure/get-keyvault-secrets@v1.1
+      - uses: Azure/get-keyvault-secrets@v1
         id: keyvault
         with:
           keyvault: ${{ env.key_vault }}
@@ -182,7 +182,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: hashicorp/setup-terraform@v3
-      - uses: actions/download-artifact@v3
 
       - name: Log in to Azure using OIDC
         uses: azure/login@v2
