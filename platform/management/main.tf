@@ -75,8 +75,3 @@ resource "azurerm_key_vault_secret" "kv_secret" {
     azurerm_role_assignment.kv_access
   ]
 }
-
-resource "azurerm_resource_group" "tmp" {
-  name     = "Temp-rg"
-  location = var.location
-}
