@@ -165,10 +165,10 @@ jobs:
         uses: Sibz/github-status-action@v1.1.6
         with:
           authToken: ${{ secrets.GITHUB_TOKEN }}
-          state: ${{ steps.fmt.outcome }}
+          state: ${{ steps.plan.outcome }}
           context: Terraform Plan
           description: Terraform Plan Summary
-          sha: ${{ github.event.push.head.sha }}
+          sha: ${{ github.sha }}
 
   apply:
     name: Terraform apply
@@ -266,7 +266,7 @@ jobs:
         uses: Sibz/github-status-action@v1.1.6
         with:
           authToken: ${{ secrets.GITHUB_TOKEN }}
-          state: ${{ steps.summary.outputs.summary }}
-          context: Terraform Plan
-          description: Terraform Plan Summary
-          sha: ${{ github.event.push.head.sha }}
+          state: ${{ steps.apply.outcome }}
+          context: Terraform Apply
+          description: Terraform Apply Summary
+          sha: ${{ github.sha }}
