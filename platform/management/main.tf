@@ -44,7 +44,7 @@ resource "azurerm_key_vault" "keyvault" {
   purge_protection_enabled      = true
 
   network_acls {
-    default_action = "Deny"
+    default_action = "Allow"
     bypass         = "AzureServices"
     ip_rules       = [var.public_ip]
   }
@@ -74,9 +74,4 @@ resource "azurerm_key_vault_secret" "kv_secret" {
   depends_on = [
     azurerm_role_assignment.kv_access
   ]
-}
-
-resource "azurerm_resource_group" "tmp" {
-  name     = "Temp-rg"
-  location = var.location
 }
