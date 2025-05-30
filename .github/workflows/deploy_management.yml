@@ -182,6 +182,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: hashicorp/setup-terraform@v3
+      - uses: actions/download-artifact@v3
 
       - name: Log in to Azure using OIDC
         uses: azure/login@v2
