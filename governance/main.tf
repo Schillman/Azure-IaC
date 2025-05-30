@@ -10,6 +10,8 @@ terraform {
 
 provider "azurerm" {
   features {}
+  use_oidc        = true
+  subscription_id = var.management_subscription_id
 }
 
 data "azurerm_client_config" "core" {}
