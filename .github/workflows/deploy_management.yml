@@ -26,7 +26,7 @@ jobs:
   plan:
     name: Terraform plan
     runs-on: ubuntu-latest
-    environment: tfplan
+    environment: mi-gh-schillman-azure-iac
     defaults:
       run:
         working-directory: ${{ env.working_dir }}
