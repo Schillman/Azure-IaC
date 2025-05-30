@@ -174,7 +174,7 @@ jobs:
     name: Terraform apply
     needs: [plan]
     runs-on: ubuntu-latest
-    environment: tfapply
+    environment: mi-gh-schillman-azure-iac
     defaults:
       run:
         working-directory: ${{ env.working_dir }}
@@ -211,7 +211,7 @@ jobs:
           ARM_USE_OIDC: true
 
       - name: Download the plan
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: ${{ format('{0}-tfplan', github.run_number) }}
 
